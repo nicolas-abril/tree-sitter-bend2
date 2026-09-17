@@ -1,0 +1,1093 @@
+==================
+Hello world
+==================
+
+import Base
+
+def main() -> IO(Unit):
+  do IO<Unit>:
+    IO.print("Hello, world!")
+
+---
+
+(source_file
+  (import_declaration)
+  (function_definition
+    (identifier)
+    (parameters)
+    (call_expression
+      (identifier)
+      (arguments
+        (identifier)))
+    (block
+      (do_expression
+        (identifier)
+        (identifier)
+        (do_body
+          (call_expression
+            (identifier)
+            (arguments
+              (string
+                (string_content)))))))))
+
+==================
+Datatypes and matches
+==================
+
+import Base
+
+type Shape is Data:
+  Circle{r: U32}
+  Square{s: U32}
+
+def area(x: Shape) -> U32:
+  match x:
+    case Circle{+r}:
+      (3 * r * r : U32)
+    case Square{+s}:
+      (s * s : U32)
+
+def main() -> U32:
+  area(Square{5})
+
+---
+
+(source_file
+  (import_declaration)
+  (type_declaration
+    (identifier)
+    (kind)
+    (constructors
+      (constructor_declaration
+        (identifier)
+        (parameter
+          (identifier)
+          (identifier)))
+      (constructor_declaration
+        (identifier)
+        (parameter
+          (identifier)
+          (identifier)))))
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (block
+      (match_expression
+        (identifier)
+        (match_cases
+          (case_clause
+            (constructor_expression
+              (identifier)
+              (reusable_expression
+                (identifier)))
+            (block
+              (parenthesized_expression
+                (binary_expression
+                  (binary_expression
+                    (integer)
+                    (identifier))
+                  (identifier))
+                (identifier))))
+          (case_clause
+            (constructor_expression
+              (identifier)
+              (reusable_expression
+                (identifier)))
+            (block
+              (parenthesized_expression
+                (binary_expression
+                  (identifier)
+                  (identifier))
+                (identifier))))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (constructor_expression
+            (identifier)
+            (integer)))))))
+
+==================
+Closures
+==================
+
+import Base
+
+def adder(k: U32) -> U32 -> U32:
+  x => (x + k : U32)
+
+def main() -> U32:
+  add2 = adder(2)
+  add5 = adder(5)
+  add5(add2(1))
+
+---
+
+(source_file
+  (import_declaration)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (function_type
+      (identifier)
+      (identifier))
+    (block
+      (lambda_expression
+        (identifier)
+        (parenthesized_expression
+          (binary_expression
+            (identifier)
+            (identifier))
+          (identifier)))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (block
+      (let_expression
+        (identifier)
+        (call_expression
+          (identifier)
+          (arguments
+            (integer)))
+        (let_expression
+          (identifier)
+          (call_expression
+            (identifier)
+            (arguments
+              (integer)))
+          (call_expression
+            (identifier)
+            (arguments
+              (call_expression
+                (identifier)
+                (arguments
+                  (integer))))))))))
+
+==================
+Recursion
+==================
+
+import Base
+
+def sum(xs: List<U32>, acc: U32) -> U32:
+  match xs:
+    case Nil{}:
+      acc
+    case Con{h, t}:
+      sum(t, (acc + h : U32))
+
+def main() -> U32:
+  sum([1, 2, 3, 4], 0)
+
+---
+
+(source_file
+  (import_declaration)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (type_application
+          (identifier)
+          (identifier)))
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (block
+      (match_expression
+        (identifier)
+        (match_cases
+          (case_clause
+            (constructor_expression
+              (identifier))
+            (block
+              (identifier)))
+          (case_clause
+            (constructor_expression
+              (identifier)
+              (identifier)
+              (identifier))
+            (block
+              (call_expression
+                (identifier)
+                (arguments
+                  (identifier)
+                  (parenthesized_expression
+                    (binary_expression
+                      (identifier)
+                      (identifier))
+                    (identifier))))))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (list_expression
+            (integer)
+            (integer)
+            (integer)
+            (integer))
+          (integer))))))
+
+==================
+Parallel calls and GPU calls
+==================
+
+import Base
+
+def pow2(+n: Nat) -> U32:
+  match n:
+    case 0n:
+      1
+    case 1n+p:
+      a b = pow2(p) pow2(p) # parallel call
+      (a + b : U32)
+
+def main() -> IO(Unit):
+  IO.print(U32.show(pow2!(20n))) # `!` runs on GPU
+
+---
+
+(source_file
+  (import_declaration)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (block
+      (match_expression
+        (identifier)
+        (match_cases
+          (case_clause
+            (natural)
+            (block
+              (integer)))
+          (case_clause
+            (successor_expression
+              (natural)
+              (identifier))
+            (block
+              (parallel_let
+                (identifier)
+                (identifier)
+                (call_expression
+                  (identifier)
+                  (arguments
+                    (identifier)))
+                (call_expression
+                  (identifier)
+                  (arguments
+                    (identifier)))
+                (comment)
+                (parenthesized_expression
+                  (binary_expression
+                    (identifier)
+                    (identifier))
+                  (identifier)))))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (call_expression
+      (identifier)
+      (arguments
+        (identifier)))
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (call_expression
+            (identifier)
+            (arguments
+              (call_expression
+                (identifier)
+                (arguments
+                  (natural)))))))))
+  (comment))
+
+==================
+Array allocation and writes
+==================
+
+import Base
+
+def main() -> Array<U32> & U32:
+  a = [0 : U32*8n] # new array with 8 copies of 0
+  a[5] <- 42       # performs an in-place rewrite
+  a[5]             # reads index 5
+
+---
+
+(source_file
+  (import_declaration)
+  (function_definition
+    (identifier)
+    (parameters)
+    (binary_expression
+      (type_application
+        (identifier)
+        (identifier))
+      (identifier))
+    (block
+      (let_expression
+        (identifier)
+        (array_expression
+          (integer)
+          (identifier)
+          (natural))
+        (comment)
+        (array_update_statement
+          (array_update
+            (index_expression
+              (identifier)
+              (integer))
+            (integer))
+          (comment)
+          (index_expression
+            (identifier)
+            (integer))))))
+  (comment))
+
+==================
+Quantities
+==================
+
+import Base
+
+# -A: erased (gone at runtime)
+#  n: affine (used at most once)
+# +x: reusable (requires A to be Data)
+def replicate(-A: Data, n: Nat, +x: A) -> List<A>:
+  match n:
+    case 0n:
+      Nil{}
+    case 1n+p:
+      x <> replicate(A, p, x)
+
+def main() -> List<U32>:
+  replicate(U32, 3n, 7)
+
+---
+
+(source_file
+  (import_declaration)
+  (comment)
+  (comment)
+  (comment)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (kind))
+      (parameter
+        (identifier)
+        (identifier))
+      (parameter
+        (identifier)
+        (identifier)))
+    (type_application
+      (identifier)
+      (identifier))
+    (block
+      (match_expression
+        (identifier)
+        (match_cases
+          (case_clause
+            (natural)
+            (block
+              (constructor_expression
+                (identifier))))
+          (case_clause
+            (successor_expression
+              (natural)
+              (identifier))
+            (block
+              (binary_expression
+                (identifier)
+                (call_expression
+                  (identifier)
+                  (arguments
+                    (identifier)
+                    (identifier)
+                    (identifier))))))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (type_application
+      (identifier)
+      (identifier))
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (identifier)
+          (natural)
+          (integer))))))
+
+==================
+Kinds and implicit grades
+==================
+
+import Base
+
+#  a: a quantity (&0, &1 or &2)
+# -A: a type whose values may be used a times
+def length(a, -A: Kind(a), xs: List<a, A>) -> Nat:
+  match xs:
+    case Nil{}:
+      0n
+    case Con{h, t}:
+      1n+length(a, A, t)
+
+def main() -> Nat:
+  length(&2, U32, [1, 2, 3])
+
+---
+
+(source_file
+  (import_declaration)
+  (comment)
+  (comment)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier))
+      (parameter
+        (identifier)
+        (kind
+          (identifier)))
+      (parameter
+        (identifier)
+        (type_application
+          (identifier)
+          (identifier)
+          (identifier))))
+    (identifier)
+    (block
+      (match_expression
+        (identifier)
+        (match_cases
+          (case_clause
+            (constructor_expression
+              (identifier))
+            (block
+              (natural)))
+          (case_clause
+            (constructor_expression
+              (identifier)
+              (identifier)
+              (identifier))
+            (block
+              (successor_expression
+                (natural)
+                (call_expression
+                  (identifier)
+                  (arguments
+                    (identifier)
+                    (identifier)
+                    (identifier))))))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (quantity)
+          (identifier)
+          (list_expression
+            (integer)
+            (integer)
+            (integer)))))))
+
+==================
+Templates
+==================
+
+import Base
+
+# ~f: substituted at compile time, not passed at runtime
+def twice(~f: U32 -> U32, x: U32) -> U32:
+  f(f(x))
+
+def main() -> U32:
+  twice(~(x => (x + 1 : U32)), 40)
+
+---
+
+(source_file
+  (import_declaration)
+  (comment)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (function_type
+          (identifier)
+          (identifier)))
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (call_expression
+            (identifier)
+            (arguments
+              (identifier)))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (template_argument
+            (parenthesized_expression
+              (lambda_expression
+                (identifier)
+                (parenthesized_expression
+                  (binary_expression
+                    (identifier)
+                    (integer))
+                  (identifier)))))
+          (integer))))))
+
+==================
+Laws and rewrites
+==================
+
+import Base
+
+# LAW: "for every x, x plus 0 equals x"
+law add_zero:
+  for x: Nat
+  {Nat.add(x, 0n) == x : Nat}
+
+# PROOF: case analysis:
+# - base case: reflexivity
+# - step case: induction, rewrite, reflexivity
+def add_zero(x):
+  match x:
+    case 0n:
+      {==}
+    case 1n+p:
+      %add_zero(p) : {1n+Nat.add(p, 0n) == 1n+_ : Nat}
+      {==}
+
+def main() -> {Nat.add(2n, 0n) == 2n : Nat}:
+  add_zero(2n)
+
+---
+
+(source_file
+  (import_declaration)
+  (comment)
+  (law_declaration
+    (identifier)
+    (law_body
+      (quantifier
+        (identifier)
+        (identifier))
+      (equality_type
+        (call_expression
+          (identifier)
+          (arguments
+            (identifier)
+            (natural)))
+        (identifier)
+        (identifier))))
+  (comment)
+  (comment)
+  (comment)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)))
+    (block
+      (match_expression
+        (identifier)
+        (match_cases
+          (case_clause
+            (natural)
+            (block
+              (reflexivity)))
+          (case_clause
+            (successor_expression
+              (natural)
+              (identifier))
+            (block
+              (rewrite_expression
+                (call_expression
+                  (identifier)
+                  (arguments
+                    (identifier)))
+                (equality_type
+                  (successor_expression
+                    (natural)
+                    (call_expression
+                      (identifier)
+                      (arguments
+                        (identifier)
+                        (natural))))
+                  (successor_expression
+                    (natural)
+                    (identifier))
+                  (identifier))
+                (reflexivity))))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (equality_type
+      (call_expression
+        (identifier)
+        (arguments
+          (natural)
+          (natural)))
+      (natural)
+      (identifier))
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (natural))))))
+
+==================
+IO and concurrency
+==================
+
+import Base
+
+def greet(name: String) -> IO(String):
+  do IO<String>:
+    IO.sleep(1000)             # a step
+    return "Hello, " ++ name   # return: wraps a pure value
+
+def main() -> IO(Unit):
+  do IO<Unit>:
+    name : String <- IO.try(String, IO.get_env("USER")) # <-: binds a result
+    chan : Chan(String) <- IO.fork(String, greet(name)) # runs concurrently
+    IO.print("Waiting...")
+    text : String <- IO.join(String, chan)
+    IO.print(text)
+
+---
+
+(source_file
+  (import_declaration)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (call_expression
+      (identifier)
+      (arguments
+        (identifier)))
+    (block
+      (do_expression
+        (identifier)
+        (identifier)
+        (do_body
+          (do_step
+            (call_expression
+              (identifier)
+              (arguments
+                (integer))))
+          (comment)
+          (return_expression
+            (binary_expression
+              (string
+                (string_content))
+              (identifier)))))))
+  (comment)
+  (function_definition
+    (identifier)
+    (parameters)
+    (call_expression
+      (identifier)
+      (arguments
+        (identifier)))
+    (block
+      (do_expression
+        (identifier)
+        (identifier)
+        (do_body
+          (monadic_binding
+            (identifier)
+            (identifier)
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier)
+                (call_expression
+                  (identifier)
+                  (arguments
+                    (string
+                      (string_content)))))))
+          (comment)
+          (monadic_binding
+            (identifier)
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier)))
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier)
+                (call_expression
+                  (identifier)
+                  (arguments
+                    (identifier))))))
+          (comment)
+          (do_step
+            (call_expression
+              (identifier)
+              (arguments
+                (string
+                  (string_content)))))
+          (monadic_binding
+            (identifier)
+            (identifier)
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier)
+                (identifier))))
+          (call_expression
+            (identifier)
+            (arguments
+              (identifier))))))))
+
+==================
+Custom monads
+==================
+
+import Base
+
+def add_strs(a: String, b: String) -> Maybe<&2, U32>:
+  do Maybe<&2, U32>:
+    x : U32 <- U32.read(a) # a None here ends the block with None
+    y : U32 <- U32.read(b)
+    return (x + y : U32)
+
+def main() -> Maybe<&2, U32>:
+  add_strs("40", "2")
+
+---
+
+(source_file
+  (import_declaration)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier))
+      (parameter
+        (identifier)
+        (identifier)))
+    (type_application
+      (identifier)
+      (quantity)
+      (identifier))
+    (block
+      (do_expression
+        (identifier)
+        (quantity)
+        (identifier)
+        (do_body
+          (monadic_binding
+            (identifier)
+            (identifier)
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier))))
+          (comment)
+          (monadic_binding
+            (identifier)
+            (identifier)
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier))))
+          (return_expression
+            (parenthesized_expression
+              (binary_expression
+                (identifier)
+                (identifier))
+              (identifier)))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (type_application
+      (identifier)
+      (quantity)
+      (identifier))
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (string
+            (string_content))
+          (string
+            (string_content)))))))
+
+==================
+App and nested constructors
+==================
+
+import Base
+
+# tick: folds a frame's events into the next state; None quits the app
+def tick(events: List<Event>, color: U32) -> IO(Maybe<U32>):
+  match events:
+    case Nil{}:
+      IO.pure(Maybe<U32>, Some{color})
+    case Con{Close{}, rest}:
+      IO.pure(Maybe<U32>, None{})
+    case Con{e, rest}:
+      tick(rest, (color + 1 : U32))
+
+def main() -> IO(Unit):
+  # view: returns the state beside its image; Pix paints the whole frame
+  App.run(~U32, ~App{+s => (s, Pix{s}), tick}, "Hello", 256, 256, 0)
+
+---
+
+(source_file
+  (import_declaration)
+  (comment)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (type_application
+          (identifier)
+          (identifier)))
+      (parameter
+        (identifier)
+        (identifier)))
+    (call_expression
+      (identifier)
+      (arguments
+        (type_application
+          (identifier)
+          (identifier))))
+    (block
+      (match_expression
+        (identifier)
+        (match_cases
+          (case_clause
+            (constructor_expression
+              (identifier))
+            (block
+              (call_expression
+                (identifier)
+                (arguments
+                  (type_application
+                    (identifier)
+                    (identifier))
+                  (constructor_expression
+                    (identifier)
+                    (identifier))))))
+          (case_clause
+            (constructor_expression
+              (identifier)
+              (constructor_expression
+                (identifier))
+              (identifier))
+            (block
+              (call_expression
+                (identifier)
+                (arguments
+                  (type_application
+                    (identifier)
+                    (identifier))
+                  (constructor_expression
+                    (identifier))))))
+          (case_clause
+            (constructor_expression
+              (identifier)
+              (identifier)
+              (identifier))
+            (block
+              (call_expression
+                (identifier)
+                (arguments
+                  (identifier)
+                  (parenthesized_expression
+                    (binary_expression
+                      (identifier)
+                      (integer))
+                    (identifier))))))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (call_expression
+      (identifier)
+      (arguments
+        (identifier)))
+    (block
+      (comment)
+      (call_expression
+        (identifier)
+        (arguments
+          (template_argument
+            (identifier))
+          (template_argument
+            (constructor_expression
+              (identifier)
+              (lambda_expression
+                (reusable_expression
+                  (identifier))
+                (tuple_expression
+                  (identifier)
+                  (constructor_expression
+                    (identifier)
+                    (identifier))))
+              (identifier)))
+          (string
+            (string_content))
+          (integer)
+          (integer)
+          (integer))))))
+
+==================
+Base operators
+==================
+
+import Base
+
+def main() -> String:
+  +a = (6 * 7 : U32)         # sugar for U32.mul(6, 7)
+  b  = U32.to_nat(a)         # conversions are T.to_x and T.from_x
+  U32.show(a) ++ " = " ++ Nat.show(b)
+
+---
+
+(source_file
+  (import_declaration)
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (block
+      (let_expression
+        (reusable_expression
+          (identifier))
+        (parenthesized_expression
+          (binary_expression
+            (integer)
+            (integer))
+          (identifier))
+        (comment)
+        (let_expression
+          (identifier)
+          (call_expression
+            (identifier)
+            (arguments
+              (identifier)))
+          (comment)
+          (binary_expression
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier)))
+            (binary_expression
+              (string
+                (string_content))
+              (call_expression
+                (identifier)
+                (arguments
+                  (identifier))))))))))
+
+==================
+Module definitions
+==================
+
+# math.bend
+import Base
+
+def square(+x: U32) -> U32:
+  (x * x : U32)
+
+---
+
+(source_file
+  (comment)
+  (import_declaration)
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (block
+      (parenthesized_expression
+        (binary_expression
+          (identifier)
+          (identifier))
+        (identifier)))))
+
+==================
+Module imports
+==================
+
+# main.bend
+import Base
+import ./math.bend as M  # M.x now names every def of math.bend
+
+def main() -> U32:
+  M.square(7)
+
+---
+
+(source_file
+  (comment)
+  (import_declaration)
+  (import_declaration
+    (module_path)
+    (identifier))
+  (comment)
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (integer))))))

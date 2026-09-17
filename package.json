@@ -1,0 +1,25 @@
+{
+  "name": "tree-sitter-bend2",
+  "version": "0.1.0",
+  "description": "Tree-sitter grammar for Bend 2",
+  "license": "Apache-2.0",
+  "scripts": {
+    "generate": "tree-sitter generate",
+    "test": "tree-sitter test && node scripts/test-editor.cjs",
+    "test:upstream": "node scripts/test-upstream.cjs",
+    "test:fuzz": "tree-sitter fuzz --iterations 50 --edits 3"
+  },
+  "devDependencies": {
+    "tree-sitter-cli": "0.27.0"
+  },
+  "files": [
+    "grammar.js",
+    "tree-sitter.json",
+    "src/**",
+    "queries/**"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nicolas-abril/tree-sitter-bend2"
+  }
+}

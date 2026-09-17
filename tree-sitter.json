@@ -1,0 +1,29 @@
+{
+  "grammars": [
+    {
+      "name": "bend2",
+      "camelcase": "Bend2",
+      "scope": "source.bend2",
+      "path": ".",
+      "file-types": [
+        "bend"
+      ],
+      "highlights": "queries/highlights.scm",
+      "injection-regex": "^bend2?$",
+      "tags": "queries/tags.scm"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "Apache-2.0",
+    "description": "Tree-sitter grammar for Bend 2",
+    "authors": [
+      {
+        "name": "Nicolas Abril"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/nicolas-abril/tree-sitter-bend2"
+    }
+  }
+}

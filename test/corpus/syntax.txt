@@ -1,0 +1,804 @@
+==================
+Empty datatypes and absurd matches
+==================
+
+import Base
+type Empty is Data:
+law absurd:
+  for e: Empty
+  U32
+def absurd(e):
+  match e:
+def after() -> U32: 0
+
+---
+
+(source_file
+  (import_declaration)
+  (type_declaration
+    (identifier)
+    (kind))
+  (law_declaration
+    (identifier)
+    (law_body
+      (quantifier
+        (identifier)
+        (identifier))
+      (identifier)))
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)))
+    (block
+      (match_expression
+        (identifier))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (integer)))
+
+==================
+Dependent types, quantifier constraints and witnesses
+==================
+
+type Box<a, -A: Kind(a)> is Kind(a):
+  Box{value: A}
+law select:
+  for -A: Type
+  for x: A where P(x)
+  exs witness: A where Q(witness)
+  @-proof: P(witness) -> &y:A -> A | Box<&1, A>
+def select(A, x):
+  ?TODO
+
+---
+
+(source_file
+  (type_declaration
+    (identifier)
+    (type_parameters
+      (parameter
+        (identifier))
+      (parameter
+        (identifier)
+        (kind
+          (identifier))))
+    (kind
+      (identifier))
+    (constructors
+      (constructor_declaration
+        (identifier)
+        (parameter
+          (identifier)
+          (identifier)))))
+  (law_declaration
+    (identifier)
+    (law_body
+      (quantifier
+        (identifier)
+        (kind))
+      (quantifier
+        (identifier)
+        (identifier)
+        (call_expression
+          (identifier)
+          (arguments
+            (identifier))))
+      (quantifier
+        (identifier)
+        (identifier)
+        (call_expression
+          (identifier)
+          (arguments
+            (identifier))))
+      (dependent_type
+        (identifier)
+        (call_expression
+          (identifier)
+          (arguments
+            (identifier)))
+        (dependent_type
+          (identifier)
+          (identifier)
+          (binary_expression
+            (identifier)
+            (type_application
+              (identifier)
+              (quantity)
+              (identifier)))))))
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier))
+      (parameter
+        (identifier)))
+    (block
+      (hole
+        (identifier)))))
+
+==================
+Foreign effects and unsafe annotation
+==================
+
+@unsafe
+def custom(x: U32) -> IO(U32):
+  import "./custom.c"
+  import "./custom.js"
+@unsafe def loop(n: Nat) -> Nat: loop(n)
+
+---
+
+(source_file
+  (function_definition
+    (decorator)
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (call_expression
+      (identifier)
+      (arguments
+        (identifier)))
+    (block
+      (foreign_body
+        (foreign_import
+          (string
+            (string_content)))
+        (foreign_import
+          (string
+            (string_content))))))
+  (function_definition
+    (decorator)
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (call_expression
+      (identifier)
+      (arguments
+        (identifier)))))
+
+==================
+Named rewrites and raw match functions
+==================
+
+law proof:
+  for e: {x != y : Nat}
+  Nat
+def proof(e):
+  %p@Equal.sym(Nat, x, y, e) : {_ == y : Nat};
+  %other : {_ == y : Nat};
+  {==}
+def raw(x: Nat) -> Nat:
+  \{Zero: 0n; Succ: p => p;}
+def empty() -> Empty:
+  \{}
+
+---
+
+(source_file
+  (law_declaration
+    (identifier)
+    (law_body
+      (quantifier
+        (identifier)
+        (equality_type
+          (identifier)
+          (identifier)
+          (identifier)))
+      (identifier)))
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)))
+    (block
+      (rewrite_expression
+        (identifier)
+        (call_expression
+          (identifier)
+          (arguments
+            (identifier)
+            (identifier)
+            (identifier)
+            (identifier)))
+        (equality_type
+          (identifier)
+          (identifier)
+          (identifier))
+        (rewrite_expression
+          (identifier)
+          (equality_type
+            (identifier)
+            (identifier)
+            (identifier))
+          (reflexivity)))))
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (block
+      (match_function
+        (match_arm
+          (identifier)
+          (natural))
+        (match_arm
+          (identifier)
+          (lambda_expression
+            (identifier)
+            (identifier))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (block
+      (match_function))))
+
+==================
+Comments, Unicode characters and string escapes
+==================
+
+#| expected output comments are comments
+import 0x1234abcdef/main.bend as M
+def text() -> String:
+  "# text is not a comment: \\ \" \n \t \r \0 \u{1F600}"
+def ch() -> Char: '#'
+def emoji() -> Char: '😀'
+def escaped() -> Char: '\u{1F600}'
+def float() -> F32: 1.5e-3
+def multi() -> String: "first
+  second"
+
+---
+
+(source_file
+  (comment)
+  (import_declaration
+    (module_path)
+    (identifier))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (block
+      (string
+        (string_content)
+        (escape_sequence)
+        (string_content)
+        (escape_sequence)
+        (string_content)
+        (escape_sequence)
+        (string_content)
+        (escape_sequence)
+        (string_content)
+        (escape_sequence)
+        (string_content)
+        (escape_sequence)
+        (string_content)
+        (escape_sequence))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (character))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (character))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (character
+      (escape_sequence)))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (float))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (string
+      (string_content))))
+
+==================
+Operator precedence and generic closing brackets
+==================
+
+def f(a: U32, b: U32, c: U32) -> Bool:
+  (a + b * c << 2n < c && b >= c || a > b : U32)
+def nested(x: List<List<U32>>) -> U32:
+  (8 >> 1n .&. 3 .^. 4 .|. 5 : U32)
+def other(a: Nat, b: Nat) -> Nat:
+  (a / b % 3n - 2n)
+def cons(h: Nat, t: List<Nat>) -> List<Nat>: h <> t
+def str(a: String, b: String) -> String: a ++ b
+
+---
+
+(source_file
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier))
+      (parameter
+        (identifier)
+        (identifier))
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (block
+      (parenthesized_expression
+        (binary_expression
+          (binary_expression
+            (binary_expression
+              (binary_expression
+                (binary_expression
+                  (identifier)
+                  (binary_expression
+                    (identifier)
+                    (identifier)))
+                (natural))
+              (identifier))
+            (binary_expression
+              (identifier)
+              (identifier)))
+          (binary_expression
+            (identifier)
+            (identifier)))
+        (identifier))))
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (type_application
+          (identifier)
+          (type_application
+            (identifier)
+            (identifier)))))
+    (identifier)
+    (block
+      (parenthesized_expression
+        (binary_expression
+          (binary_expression
+            (binary_expression
+              (binary_expression
+                (integer)
+                (natural))
+              (integer))
+            (integer))
+          (integer))
+        (identifier))))
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier))
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (block
+      (parenthesized_expression
+        (binary_expression
+          (binary_expression
+            (binary_expression
+              (identifier)
+              (identifier))
+            (natural))
+          (natural)))))
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier))
+      (parameter
+        (identifier)
+        (type_application
+          (identifier)
+          (identifier))))
+    (type_application
+      (identifier)
+      (identifier))
+    (binary_expression
+      (identifier)
+      (identifier)))
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier))
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (binary_expression
+      (identifier)
+      (identifier))))
+
+==================
+Let quantities, parallel binders and destructuring
+==================
+
+def f(+x: U32, p: U32 & U32) -> U32:
+  +a +b = U32.inc(x) U32.inc(x)
+  (first, +second) = p
+  Box{inside} = Box{first}
+  -proof = {==};
+  a + b + inside + second
+
+---
+
+(source_file
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier))
+      (parameter
+        (identifier)
+        (binary_expression
+          (identifier)
+          (identifier))))
+    (identifier)
+    (block
+      (parallel_let
+        (reusable_expression
+          (identifier))
+        (reusable_expression
+          (identifier))
+        (call_expression
+          (identifier)
+          (arguments
+            (identifier)))
+        (call_expression
+          (identifier)
+          (arguments
+            (identifier)))
+        (let_expression
+          (tuple_expression
+            (identifier)
+            (reusable_expression
+              (identifier)))
+          (identifier)
+          (let_expression
+            (constructor_expression
+              (identifier)
+              (identifier))
+            (constructor_expression
+              (identifier)
+              (identifier))
+            (let_expression
+              (identifier)
+              (reflexivity)
+              (binary_expression
+                (binary_expression
+                  (binary_expression
+                    (identifier)
+                    (identifier))
+                  (identifier))
+                (identifier)))))))))
+
+==================
+Array depth, annotations and parenthesized bodies
+==================
+
+def f() -> Array<U32> & U32:
+  a = [0 : U32^3n]
+  a[0] <- 42;
+  (pair = a[0]; pair)
+def ann() -> U32: {42 : U32}
+
+---
+
+(source_file
+  (function_definition
+    (identifier)
+    (parameters)
+    (binary_expression
+      (type_application
+        (identifier)
+        (identifier))
+      (identifier))
+    (block
+      (let_expression
+        (identifier)
+        (array_expression
+          (integer)
+          (identifier)
+          (natural))
+        (array_update_statement
+          (array_update
+            (index_expression
+              (identifier)
+              (integer))
+            (integer))
+          (parenthesized_expression
+            (let_expression
+              (identifier)
+              (index_expression
+                (identifier)
+                (integer))
+              (identifier)))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (annotation_expression
+      (integer)
+      (identifier))))
+
+==================
+Inline matches, nesting, blank lines and EOF dedents
+==================
+
+def f(x: Nat, y: Nat) -> Nat: match x:
+  case 0n:
+    # the comment must not change the suite
+    match y:
+      case 0n: 0n
+      case 1n+p: p
+
+  case 1n++q:
+    q
+# outside both matches
+def after() -> Nat: 0n
+
+---
+
+(source_file
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (identifier))
+      (parameter
+        (identifier)
+        (identifier)))
+    (identifier)
+    (match_expression
+      (identifier)
+      (match_cases
+        (case_clause
+          (natural)
+          (block
+            (comment)
+            (match_expression
+              (identifier)
+              (match_cases
+                (case_clause
+                  (natural)
+                  (natural))
+                (case_clause
+                  (successor_expression
+                    (natural)
+                    (identifier))
+                  (identifier))))))
+        (case_clause
+          (successor_expression
+            (natural)
+            (reusable_expression
+              (identifier)))
+          (block
+            (identifier))))))
+  (comment)
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (natural)))
+
+==================
+Do binding forms and reusable lambdas
+==================
+
+def action() -> IO(Unit):
+  do IO<Unit>:
+    +x : U32 <- IO.pure(U32, 2)
+    +y : U32 = 3
+    z = {4 : U32}
+    Unit <- IO.print("step")
+    IO.print("next")
+    return Unit{}
+def lam() -> U32 -> U32: +x => (x + x : U32)
+
+---
+
+(source_file
+  (function_definition
+    (identifier)
+    (parameters)
+    (call_expression
+      (identifier)
+      (arguments
+        (identifier)))
+    (block
+      (do_expression
+        (identifier)
+        (identifier)
+        (do_body
+          (monadic_binding
+            (identifier)
+            (identifier)
+            (call_expression
+              (identifier)
+              (arguments
+                (identifier)
+                (integer))))
+          (monadic_binding
+            (identifier)
+            (identifier)
+            (integer))
+          (do_let
+            (identifier)
+            (annotation_expression
+              (integer)
+              (identifier)))
+          (discard_binding
+            (identifier)
+            (call_expression
+              (identifier)
+              (arguments
+                (string
+                  (string_content)))))
+          (do_step
+            (call_expression
+              (identifier)
+              (arguments
+                (string
+                  (string_content)))))
+          (return_expression
+            (constructor_expression
+              (identifier)))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (function_type
+      (identifier)
+      (identifier))
+    (lambda_expression
+      (reusable_expression
+        (identifier))
+      (parenthesized_expression
+        (binary_expression
+          (identifier)
+          (identifier))
+        (identifier)))))
+
+==================
+Multiline nested lambda and rewrite motives
+==================
+
+def f(e: {x == y : Nat}) -> Nat:
+  apply(0n, a => b =>
+    %e : &nx: Nat -> T(nx)
+        & {f(_) == f(nx) : Nat}
+    a)
+def tail() -> Nat: 0n
+
+---
+
+(source_file
+  (function_definition
+    (identifier)
+    (parameters
+      (parameter
+        (identifier)
+        (equality_type
+          (identifier)
+          (identifier)
+          (identifier))))
+    (identifier)
+    (block
+      (call_expression
+        (identifier)
+        (arguments
+          (natural)
+          (lambda_expression
+            (identifier)
+            (lambda_expression
+              (identifier)
+              (block
+                (rewrite_expression
+                  (identifier)
+                  (dependent_type
+                    (identifier)
+                    (identifier)
+                    (binary_expression
+                      (call_expression
+                        (identifier)
+                        (arguments
+                          (identifier)))
+                      (equality_type
+                        (call_expression
+                          (identifier)
+                          (arguments
+                            (identifier)))
+                        (call_expression
+                          (identifier)
+                          (arguments
+                            (identifier)))
+                        (identifier))))
+                  (identifier)))))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (natural)))
+
+==================
+Calls and indexes cannot attach from a new line
+==================
+
+def f() -> U32:
+  x = id
+  (y = x(42); y)
+def g() -> Array<U32> & U32:
+  a = [0 : U32*4n]
+  a[1] <- 2
+  a[1]
+
+---
+
+(source_file
+  (function_definition
+    (identifier)
+    (parameters)
+    (identifier)
+    (block
+      (let_expression
+        (identifier)
+        (identifier)
+        (parenthesized_expression
+          (let_expression
+            (identifier)
+            (call_expression
+              (identifier)
+              (arguments
+                (integer)))
+            (identifier))))))
+  (function_definition
+    (identifier)
+    (parameters)
+    (binary_expression
+      (type_application
+        (identifier)
+        (identifier))
+      (identifier))
+    (block
+      (let_expression
+        (identifier)
+        (array_expression
+          (integer)
+          (identifier)
+          (natural))
+        (array_update_statement
+          (array_update
+            (index_expression
+              (identifier)
+              (integer))
+            (integer))
+          (index_expression
+            (identifier)
+            (integer)))))))
