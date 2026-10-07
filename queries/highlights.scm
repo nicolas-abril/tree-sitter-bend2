@@ -28,7 +28,7 @@
 (do_expression monad: (identifier) @type)
 
 ((identifier) @type.builtin
-  (#any-of? @type.builtin "Nat" "U32" "F32" "Char" "String" "Bool" "Unit" "Empty" "IO"))
+  (#match? @type.builtin "\\`\\(?:Nat\\|U32\\|F32\\|Char\\|String\\|Bool\\|Unit\\|Empty\\|IO\\)\\'"))
 
 ["def" "law" "type" "is" "for" "exs" "where" "do"] @keyword
 ["match" "case"] @keyword.conditional
